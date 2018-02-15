@@ -11,7 +11,6 @@ using Newtonsoft.Json.Linq;
 
 namespace WebAPIGateway.Controllers {
     
-    [Route("/{service}/{*uri}")]
     public class ForwardController : Controller 
     {
         private IDistributedCache _cache;
@@ -22,40 +21,52 @@ namespace WebAPIGateway.Controllers {
             _cache = cache;
         }
 
-        [HttpGet]
-        public async Task<JObject> ForwardGet(string service, string uri) {
-            string serviceUrl = await _cache.GetStringAsync(service);
 
-            if(serviceUrl == null || serviceUrl == "")
-                return JObject.Parse("{ \"status\": \"There is no such service, you dumbass!\" }");
-            else
-                return JObject.Parse(await _client.GetStringAsync(serviceUrl + "/" + uri));
-        }
-
-        [HttpPost]
-        public async Task<JObject> ForwardPost(string service, string uri)
+        [Route("/{service}/{*uri}")]
+        public async Task<IActionResult> Index(string service, string uri)
         {
             string serviceUrl = await _cache.GetStringAsync(service);
+            if(serviceUrl == null) {
+                return Ok(JObject.Parse("{ \"error\": \"Invalid service\" }"));
+            }
+            string url = serviceUrl + "/" + uri;
 
-            string body = await GetBodyAsync(Request);
-
-            if(serviceUrl == null || serviceUrl == "") {
-                return JObject.Parse("{ \"status\": \"There is no such service, you dumbass!\" }");
-            } else {
-                return await PostBodyAsync(serviceUrl + "/" + uri, body);
+            switch(Request.Method) {
+                case "GET": return await ForwardGet(url);
+                case "POST": return await ForwardPost(url, Request.Body);
+                case "DELETE": return await ForwardDelete(url);
+                default: return Ok(JObject.Parse("{ \"status\": \"Method not valid!\" }"));
             }
         }
-
-        public async Task<JObject> PostBodyAsync(string url, string body)
-        {
-                var content = new StringContent(body, UnicodeEncoding.UTF8, "application/json");
-                var response = await _client.PostAsync(url, content);
-                return JObject.Parse(await response.Content.ReadAsStringAsync());
+        public async Task<IActionResult> ForwardGet(string url) {
+            string response = await _client.GetStringAsync(url);
+            try {
+                return Ok(JArray.Parse(response));
+            }
+            catch {
+                return Ok(JObject.Parse(response));
+            }
         }
-
-        public async Task<string> GetBodyAsync(HttpRequest request)
+        public async Task<IActionResult> ForwardPost(string url, Stream bodyStream)
         {
-            using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
+            string body = await ParseBodyAsync(bodyStream);
+
+            return await PostBodyAsync(url, body);
+        }
+        public async Task<IActionResult> ForwardDelete(string url)
+        {
+            var response = await _client.DeleteAsync(url);
+            return NoContent();
+        }
+        public async Task<IActionResult> PostBodyAsync(string url, string body)
+        {
+            var content = new StringContent(body, UnicodeEncoding.UTF8, "application/json");
+            var response = await _client.PostAsync(url, content);
+            return Created(url, JObject.Parse(await response.Content.ReadAsStringAsync()));
+        }
+        public async Task<string> ParseBodyAsync(Stream bodyStream)
+        {
+            using (StreamReader reader = new StreamReader(bodyStream, Encoding.UTF8))
             {  
                 return await reader.ReadToEndAsync();
             }
