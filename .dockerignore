@@ -1,0 +1,7 @@
+obj
+bin
+out
+builder.sh
+.git
+.travis.yml
+.vscode

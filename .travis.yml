@@ -1,0 +1,13 @@
+language: csharp
+
+mono: none
+
+dotnet: 2.0.0
+
+services:
+  - docker
+
+script:
+  - docker build -t joaopio/web-api-gateway .
+  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+  - docker push joaopio/web-api-gateway
