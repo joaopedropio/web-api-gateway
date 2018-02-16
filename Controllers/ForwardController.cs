@@ -8,77 +8,62 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json.Linq;
+using ParseStream;
+using Service;
+using JSON;
 
 namespace WebAPIGateway.Controllers {
     
+    [Route("/{service}/{*uri}")]
     public class ForwardController : Controller 
     {
         private IDistributedCache _cache;
         private HttpClient _client = new HttpClient();
         public ForwardController(IDistributedCache cache)
         {
-            cache.SetString("user", "http://localhost:3000");
             _cache = cache;
         }
 
-
-        [Route("/{service}/{*uri}")]
-        public async Task<IActionResult> Index(string service, string uri)
+        [HttpGet]
+        public async Task<IActionResult> ForwardGet(string service, string uri)
         {
-            if(service.ToLower() == "admin")
-            {
-                switch(Request.Method)
-                {
-                    case "GET" : return Ok(JObject.Parse(await GetAdmin(uri)));
-                    case "POST": return Ok(JObject.Parse(await PostAdmin(Request.Body)));
-                    case "DELETE": return Ok(JObject.Parse(await DeleteAdmin(uri)));
-                    default: return Ok("deu Ruim");
-                }
-            }
-            string serviceUrl = await _cache.GetStringAsync(service);
-            if(serviceUrl == null)
-            {
-                return Ok(JObject.Parse("{ \"error\": \"Invalid service\" }"));
-            }
-            string url = serviceUrl + "/" + uri;
-
-            switch(Request.Method)
-            {
-                case "GET": return await ForwardGet(url);
-                case "POST": return await ForwardPost(url, Request.Body);
-                case "DELETE": return await ForwardDelete(url);
-                case "PUT": return await ForwardPut(url, Request.Body);
-                default: return Ok(JObject.Parse("{ \"status\": \"Method not valid!\" }"));
-            }
-        }
-        public async Task<IActionResult> ForwardGet(string url)
-        {
+            string url = await _cache.GetServiceAsync(service, uri);
             string response = await _client.GetStringAsync(url);
+            JContainer res;
             try
             {
-                return Ok(JArray.Parse(response));
+                res = response.toJSONArray();
             }
             catch
             {
-                return Ok(JObject.Parse(response));
+                res = response.toJSON();
             }
+            return Ok(res);
         }
-        public async Task<IActionResult> ForwardPost(string url, Stream bodyStream)
+
+        [HttpPost]
+        public async Task<IActionResult> ForwardPost(string service, string uri)
         {
-            string body = await ParseBodyAsync(bodyStream);
+            string url = await _cache.GetServiceAsync(service, uri);
+
+            string body = Request.Body.toString();
 
             return await PostBodyAsync(url, body);
         }
-        public async Task<IActionResult> ForwardDelete(string url)
+
+        [HttpDelete]
+        public async Task<IActionResult> ForwardDelete(string service, string uri)
         {
-            var response = await _client.DeleteAsync(url);
+            string url = await _cache.GetServiceAsync(service, uri);
+            await _client.DeleteAsync(url);
             return NoContent();
         }
 
-        public async Task<IActionResult> ForwardPut(string url, Stream bodyStream)
+        [HttpPut]
+        public async Task<IActionResult> ForwardPut(string service, string uri)
         {
-            string body = await ParseBodyAsync(bodyStream);
-
+            string url = await _cache.GetServiceAsync(service, uri);
+            string body = Request.Body.toString();
             return await PutBodyAsync(url, body);
         }
 
@@ -94,62 +79,6 @@ namespace WebAPIGateway.Controllers {
             var content = new StringContent(body, UnicodeEncoding.UTF8, "application/json");
             var response = await _client.PostAsync(url, content);
             return Created(url, JObject.Parse(await response.Content.ReadAsStringAsync()));
-        }
-        public async Task<string> ParseBodyAsync(Stream bodyStream)
-        {
-            using (StreamReader reader = new StreamReader(bodyStream, Encoding.UTF8))
-            {  
-                return await reader.ReadToEndAsync();
-            }
-        }
-
-        public async Task<string> GetAdmin(string service)
-        {
-            if(service == null)
-            {
-                return "{ \"error\": \"no service provided\" }";
-            }
-            string url = await _cache.GetStringAsync(service);
-            if (url == "" || url == null)
-            {
-                return "{ \"error\": \"service not found\" }";
-            }
-            return "{\"service\": \"" + service + "\", \"url\": \"" + url + "\" }";
-        }
-
-        public async Task<string> PostAdmin(Stream bodyStream)
-        {
-            var bodyString = await ParseBodyAsync(bodyStream);
-            JObject body = JObject.Parse(bodyString);
-
-            try
-            {
-                string service = (string)body.GetValue("service");
-                string url = (string)body.GetValue("url");
-
-                await _cache.SetStringAsync(service, url);
-                return "{ \"status\": \"Service Added!\" }";
-            }
-            catch (System.Exception)
-            {
-                return "{ \"error\": \"Body cant be empty\" }"; 
-            }
-        }
-
-        public async Task<string> DeleteAdmin(string service)
-        {
-            if(service == null || service == "")
-            {
-                return "{ \"error\": \"servic can not be empty!\" }"; 
-            }
-            string value = await _cache.GetStringAsync(service);
-            if(value == null || value == "")
-            {
-                return "{ \"error\": \"service does not exist\" }"; 
-            } else {
-                await _cache.RemoveAsync(service);
-                return "{ \"status\": \"service deleted!\" }"; 
-            }
         }
     }
 }
