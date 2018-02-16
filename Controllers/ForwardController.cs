@@ -1,10 +1,6 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json.Linq;
@@ -12,8 +8,9 @@ using ParseStream;
 using Service;
 using JSON;
 
-namespace WebAPIGateway.Controllers {
-    
+namespace WebAPIGateway.Controllers
+{
+
     [Route("/{service}/{*uri}")]
     public class ForwardController : Controller 
     {
