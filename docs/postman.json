@@ -21,14 +21,13 @@
 					"raw": "{\n\t\"url\": \"http:/asfsaf\",\n\t\"service\": \"fulano\"\n}"
 				},
 				"url": {
-					"raw": "http://localhost:5000/user/",
+					"raw": "http://localhost:5000/",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "5000",
 					"path": [
-						"user",
 						""
 					]
 				},
@@ -74,7 +73,7 @@
 				"header": [],
 				"body": {},
 				"url": {
-					"raw": "http://localhost:5000/user/users/5a8602959fe67e000fcb90c0",
+					"raw": "http://localhost:5000/user/users/5a8748c45fa993001abc1088",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -83,7 +82,7 @@
 					"path": [
 						"user",
 						"users",
-						"5a8602959fe67e000fcb90c0"
+						"5a8748c45fa993001abc1088"
 					]
 				},
 				"description": ""
@@ -107,6 +106,111 @@
 						"user",
 						"users",
 						""
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "PUT to User API",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\" : \"Manolo\"\t\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5000/user/users/5a87494c5fa993001abc108a",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"user",
+						"users",
+						"5a87494c5fa993001abc108a"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Admin GET Listall",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:5000/admin/user",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"admin",
+						"user"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Admin POST CreateOne",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"url\": \"http://localhost:3000\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5000/admin/user",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"admin",
+						"user"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Admin DELETE RemoveOne",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:5000/admin/user",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"admin",
+						"user"
 					]
 				},
 				"description": ""
