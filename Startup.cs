@@ -24,7 +24,7 @@ namespace WebAPIGateway
         {
             services.AddMvc();
             services.AddDistributedRedisCache(option => {
-                option.Configuration = Configuration.GetValue<string>("REDIS_IP") ?? "localhost";
+                option.Configuration = Configuration.GetValue<string>("DB_DOMAIN") ?? "localhost";
                 option.InstanceName = "master";
             });
         }
