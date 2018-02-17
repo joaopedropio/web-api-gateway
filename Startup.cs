@@ -27,15 +27,21 @@ namespace WebAPIGateway
                 option.Configuration = Configuration.GetValue<string>("DB_DOMAIN") ?? "localhost";
                 option.InstanceName = "master";
             });
+            services.AddCors();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            loggerFactory.AddConsole(Configuration.GetSection("Logging")); //log levels set in your configuration
+            loggerFactory.AddDebug(); //does all log levels
 
             app.UseMvc();
         }
