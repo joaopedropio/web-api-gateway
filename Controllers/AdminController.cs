@@ -26,7 +26,15 @@ namespace WebAPIGateway
                 return Json(new { error = "No service provided" });
             }
 
-            string url = await _cache.GetStringAsync(service);
+            string url;
+            try
+            {
+                url = await _cache.GetStringAsync(service);
+            }
+            catch (System.Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
 
             if (url == null || url == string.Empty)
             {
@@ -49,7 +57,15 @@ namespace WebAPIGateway
             {
                 string url = (string)body.GetValue("url");
 
-                await _cache.SetStringAsync(service, url);
+                try
+                {
+                    await _cache.SetStringAsync(service, url);
+                }
+                catch (System.Exception ex)
+                {
+                    Json(new { error = ex.Message});
+                }
+
                 return Json(new { status = "Service added" });
             }
             catch (System.Exception)
@@ -66,7 +82,15 @@ namespace WebAPIGateway
                 return Json(new { error = "Service can not be empty" });
             }
 
-            string value = await _cache.GetStringAsync(service);
+            string value;
+            try
+            {
+                value = await _cache.GetStringAsync(service);
+            }
+            catch (System.Exception ex)
+            {
+                return Json(new { error = ex.Message});
+            }
 
             if(value == null || value == string.Empty)
             {
@@ -74,7 +98,14 @@ namespace WebAPIGateway
             } 
             else
             {
-                await _cache.RemoveAsync(service);
+                try
+                {
+                    await _cache.RemoveAsync(service);
+                }
+                catch (System.Exception ex)
+                {
+                    return Json(new { error = ex.Message});
+                }
                 return Json(new { status = "Service deleted" });
             }
         }
