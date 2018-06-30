@@ -7,15 +7,8 @@ namespace Service
     {
         public static async Task<string> GetServiceAsync(this IDistributedCache cache, string service, string uri)
         {
-            string serviceUrl = await cache.GetStringAsync(service);
-            if(serviceUrl == null)
-            {
-                return null;
-            }
-            else
-            {
-                return serviceUrl + "/" + uri;
-            }
+            var serviceUrl = await cache.GetStringAsync(service);
+            return serviceUrl == null ? null : string.Format($"{serviceUrl}/{uri}");
         }
     }
 }

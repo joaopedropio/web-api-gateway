@@ -71,9 +71,10 @@ namespace WebAPIGateway
             if(value == null || value == string.Empty)
             {
                 return Json(new { error = "Service does not exist" });
-            } else {
+            } 
+            else
+            {
                 await _cache.RemoveAsync(service);
-
                 return Json(new { status = "Service deleted" });
             }
         }

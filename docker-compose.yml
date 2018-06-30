@@ -1,0 +1,22 @@
+version: '3'
+services:
+  webapigateway:
+    build: .
+    image: web-api-gateway
+    ports:
+      - 3000:80
+    depends_on:
+      - redis
+    environment:
+      - DB_DOMAIN=redis
+    networks:
+      - socialnetwork
+      - webapigatewaynetwork
+  redis:
+    image: redis
+    networks:
+      - webapigatewaynetwork
+networks:
+  socialnetwork:
+    external: true
+  webapigatewaynetwork:
