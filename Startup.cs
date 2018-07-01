@@ -1,45 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace WebAPIGateway
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; }
-        public Startup(IConfiguration configuration)
+        public Configuration Configuration { get; }
+        public Startup()
         {
-            Configuration = configuration;
+            Configuration = new Configuration();
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
             services.AddDistributedRedisCache(option => {
-                option.Configuration = Configuration.GetValue<string>("DB_DOMAIN") ?? "localhost";
+                option.Configuration = Configuration.DBServer;
                 option.InstanceName = "master";
             });
             services.AddCors();
             
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
+            app.UseDeveloperExceptionPage();
 
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            loggerFactory.AddConsole(Configuration.GetSection("Logging")); //log levels set in your configuration
-            loggerFactory.AddDebug(); //does all log levels
+            loggerFactory.AddConsole(Configuration.Logging);
+            loggerFactory.AddDebug();
 
             app.UseMvc();
         }

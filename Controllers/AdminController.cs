@@ -2,9 +2,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using Newtonsoft.Json.Linq;
-using ParseStream;
-using JSON;
 using Newtonsoft.Json;
 
 namespace WebAPIGateway
@@ -12,10 +9,10 @@ namespace WebAPIGateway
     [Route("/admin/{*service}")]
     public class AdminController: Controller
     {
-        IDistributedCache _cache;
+        IDistributedCache cache;
         public AdminController(IDistributedCache cache)
         {
-            _cache = cache;
+            this.cache = cache;
         }
 
         [HttpGet]
@@ -23,54 +20,56 @@ namespace WebAPIGateway
         {
             if(service == null || service == string.Empty)
             {
-                return Json(new { error = "No service provided" });
+                return new JsonResult(new { error = "No service provided" });
             }
 
+            JsonResult json;
             string url;
             try
             {
-                url = await _cache.GetStringAsync(service);
+                url = await cache.GetStringAsync(service);
             }
             catch (System.Exception ex)
             {
-                return Json(new { error = ex.Message });
+                json = new JsonResult(new { error = ex.Message });
+                json.StatusCode = 400;
+                return json;
             }
 
             if (url == null || url == string.Empty)
             {
-                return Json(new { error = "Service not found" });
+                json = new JsonResult(new { error = "Service not found" });
+                json.StatusCode = 404;
+                return json;
             }
 
-            return Json(new 
-                {
-                    service = service,
-                    url = url
-                });
+            return new JsonResult(new {service, url});
         }
 
         [HttpPost]
         public async Task<IActionResult> PostAdmin(string service)
         {
-            var body = Request.Body.toJSON();
+            var content = new StreamReader(Request.Body).ReadToEnd();
+            var serviceUrl = JsonConvert.DeserializeObject<ServiceUrl>(content);
 
             try
             {
-                string url = (string)body.GetValue("url");
-
                 try
                 {
-                    await _cache.SetStringAsync(service, url);
+                    await cache.SetStringAsync(service, serviceUrl.ToString());
                 }
                 catch (System.Exception ex)
                 {
                     Json(new { error = ex.Message});
                 }
 
-                return Json(new { status = "Service added" });
+                return new JsonResult(new { status = "Service added" });
             }
             catch (System.Exception)
             {
-                return Json(new { error = "Body can't be empty" });
+                var json = new JsonResult(new { error = "Body can't be empty" });
+                json.StatusCode = 400;
+                return json;
             }
         }
 
@@ -85,7 +84,7 @@ namespace WebAPIGateway
             string value;
             try
             {
-                value = await _cache.GetStringAsync(service);
+                value = await cache.GetStringAsync(service);
             }
             catch (System.Exception ex)
             {
@@ -100,7 +99,7 @@ namespace WebAPIGateway
             {
                 try
                 {
-                    await _cache.RemoveAsync(service);
+                    await cache.RemoveAsync(service);
                 }
                 catch (System.Exception ex)
                 {

@@ -1,12 +1,13 @@
+using System.Net;
 using System.Net.Http;
-using System.Text;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using Newtonsoft.Json.Linq;
-using ParseStream;
 using Service;
-using JSON;
+using static WebAPIGateway.Helpers.HttpResponse;
+using System.IO;
+using System.Text;
 
 namespace WebAPIGateway.Controllers
 {
@@ -14,68 +15,59 @@ namespace WebAPIGateway.Controllers
     [Route("/{service}/{*uri}")]
     public class ForwardController : Controller 
     {
-        private IDistributedCache _cache;
-        private HttpClient _client = new HttpClient();
+        private IDistributedCache cache;
+        private HttpClient client;
         public ForwardController(IDistributedCache cache)
         {
-            _cache = cache;
+            this.cache = cache;
+            this.client = new HttpClient();
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ForwardGet(string service, string uri)
+        public async Task<ContentResult> Index(string service, string uri)
         {
-            string url = await _cache.GetServiceAsync(service, uri);
-            string response = await _client.GetStringAsync(url);
-            JContainer res;
+            var url = await cache.GetServiceAsync(service, uri);
+
+            switch (Request.Method)
+            {
+                case "PUT":
+                    return await ForwardHttp(client.PutAsync, url);
+                case "GET":
+                    return await ForwardHttp(client.GetAsync, url);
+                case "POST":
+                    return await ForwardHttp(client.PostAsync, url);
+                case "DELETE":
+                    return await ForwardHttp(client.DeleteAsync, url);
+                default:
+                    return Response("{ \"error\": \"Method not supported\" }", HttpStatusCode.BadRequest);
+            }
+        }
+
+        private async Task<ContentResult> ForwardHttp(Func<string, HttpContent, Task<HttpResponseMessage>> httpClientAsync, string url)
+        {
+            var content = new StringContent(new StreamReader(Request.Body).ReadToEnd(), Encoding.UTF8, "application/json");
+
             try
             {
-                res = response.toJSONArray();
+                var response = await httpClientAsync(url, content);
+                return await Response(response);
             }
-            catch
+            catch (Exception ex)
             {
-                res = response.toJSON();
+                return Response(ex.Message, HttpStatusCode.ServiceUnavailable);
             }
-            return Ok(res);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ForwardPost(string service, string uri)
+        private async Task<ContentResult> ForwardHttp(Func<string, Task<HttpResponseMessage>> httpClientAsync, string url)
         {
-            string url = await _cache.GetServiceAsync(service, uri);
-
-            string body = Request.Body.toString();
-
-            return await PostBodyAsync(url, body);
-        }
-
-        [HttpDelete]
-        public async Task<IActionResult> ForwardDelete(string service, string uri)
-        {
-            string url = await _cache.GetServiceAsync(service, uri);
-            await _client.DeleteAsync(url);
-            return NoContent();
-        }
-
-        [HttpPut]
-        public async Task<IActionResult> ForwardPut(string service, string uri)
-        {
-            string url = await _cache.GetServiceAsync(service, uri);
-            string body = Request.Body.toString();
-            return await PutBodyAsync(url, body);
-        }
-
-        public async Task<IActionResult> PutBodyAsync(string url, string body)
-        {
-            var content = new StringContent(body, UnicodeEncoding.UTF8, "application/json");
-            var response = await _client.PutAsync(url, content);
-            return Ok(JObject.Parse(await response.Content.ReadAsStringAsync()));
-        }
-
-        public async Task<IActionResult> PostBodyAsync(string url, string body)
-        {
-            var content = new StringContent(body, UnicodeEncoding.UTF8, "application/json");
-            var response = await _client.PostAsync(url, content);
-            return Created(url, JObject.Parse(await response.Content.ReadAsStringAsync()));
+            try
+            {
+                var response = await httpClientAsync(url);
+                return await Response(response);
+            }
+            catch (Exception ex)
+            {
+                return Response(ex.Message, HttpStatusCode.ServiceUnavailable);
+            }
         }
     }
 }
