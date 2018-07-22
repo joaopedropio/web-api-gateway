@@ -7,6 +7,7 @@ namespace WebAPIGateway
         public string URL { get; private set; }
         public string DBServer { get; private set; }
         public IConfigurationSection Logging { get; set; }
+        public string Services { get; set; }
 
         public Configuration() : this(new ConfigurationBuilder().AddEnvironmentVariables().Build()) { }
 
@@ -17,6 +18,7 @@ namespace WebAPIGateway
             URL = string.Format($"http://{domain}:{port}");
             DBServer = configuration.GetValue<string>("DB_SERVER") ?? "localhost";
             Logging = configuration.GetSection("Logging");
+            Services = configuration.GetValue<string>("SERVICES");
         }
     }
 }
