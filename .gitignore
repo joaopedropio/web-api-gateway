@@ -1,5 +1,7 @@
-bin
-obj
-out
+WebAPIGateway/bin
+WebAPIGateway/obj
+WebAPIGateway/.vs
+WebAPIGateway/.vscode
+WebAPIGateway/out
 .vscode
 .vs

@@ -5,3 +5,4 @@ This gateway is only for web apps use. Soon, we'll have the Mobile API Gateway s
 
 Environment variables
 * REDIS_IP: ip or domain of the Redis instance
+* SERVICES: default services. Each service is separated by a semi-colon and each service has a name and a url separated by a colon. Example string -> "facebook,http://www.facebook.com;hotmail,http://www.hotmail.com"
