@@ -9,7 +9,7 @@ services:
       - redis
     environment:
       - SERVICES=facebook,http://www.facebook.com;hotmail,http://hotmail.com
-      - DB_DOMAIN=redis
+      - DB_SERVER=redis
     networks:
       - socialnetwork
       - webapigatewaynetwork
