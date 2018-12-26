@@ -9,5 +9,4 @@ docs
 .vscode
 .vs
 *.md
-*.sln
 *.yml

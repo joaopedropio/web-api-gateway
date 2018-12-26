@@ -8,6 +8,7 @@ services:
     depends_on:
       - redis
     environment:
+      - SERVICES=facebook,http://www.facebook.com;hotmail,http://hotmail.com
       - DB_DOMAIN=redis
     networks:
       - socialnetwork
