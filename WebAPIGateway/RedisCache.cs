@@ -8,16 +8,9 @@ namespace WebAPIGateway
 {
     public static class RedisCache
     {
-        public static void DefaultValues(IDistributedCache cache)
+        public static void DefaultValues(IDistributedCache cache, IList<Service> services)
         {
-            if (Configuration.Services == null)
-                return;
-
-            //var services = ParseServices(Configuration.Services);
-            foreach (var service in Configuration.Services)
-            {
-                cache.SetString(service.Name, service.URL);
-            }
+            services?.Select(service => cache.SetStringAsync(service.Name, service.URL));
         }
     }
 }
