@@ -7,19 +7,10 @@ namespace WebAPIGateway
 {
     public class Startup
     {
-        public Configuration Configuration { get; }
-        public Startup()
-        {
-            Configuration = new Configuration();
-        }
-
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddDistributedRedisCache(option => {
-                option.Configuration = Configuration.DBServer;
-                option.InstanceName = "master";
-            });
+            ConfigureCache(services);
             services.AddCors();
         }
 
@@ -32,6 +23,21 @@ namespace WebAPIGateway
             loggerFactory.AddDebug();
 
             app.UseMvc();
+        }
+
+        public void ConfigureCache(IServiceCollection services)
+        {
+            if (Configuration.UseRedisCache)
+            {
+                services.AddDistributedRedisCache(option => {
+                    option.Configuration = Configuration.CacheDomain;
+                    option.InstanceName = "master";
+                });
+            }
+            else
+            {
+                services.AddMemoryCache();
+            }
         }
     }
 }

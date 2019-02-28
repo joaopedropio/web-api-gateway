@@ -1,24 +1,34 @@
 ﻿using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 
 namespace WebAPIGateway
 {
-    public class Configuration
+    public static class Configuration
     {
-        public string URL { get; private set; }
-        public string DBServer { get; private set; }
-        public IConfigurationSection Logging { get; set; }
-        public string Services { get; set; }
-
-        public Configuration() : this(new ConfigurationBuilder().AddEnvironmentVariables().Build()) { }
-
-        public Configuration(IConfigurationRoot configuration)
+        public static IConfigurationRoot configuration;
+        public static string URL
         {
-            var domain = configuration.GetValue<string>("API_DOMAIN") ?? "*";
-            var port = configuration.GetValue<string>("API_PORT") ?? "80";
-            URL = string.Format($"http://{domain}:{port}");
-            DBServer = configuration.GetValue<string>("DB_SERVER") ?? "localhost";
-            Logging = configuration.GetSection("Logging");
-            Services = configuration.GetValue<string>("SERVICES");
+            get
+            {
+                var domain = configuration.GetValue<string>("API_DOMAIN") ?? "*";
+                var port = configuration.GetValue<string>("API_PORT") ?? "80";
+                return string.Format($"http://{domain}:{port}");
+            }
+        }
+        public static string CacheDomain => configuration.GetValue<string>("CACHE_DOMAIN") ?? "localhost";
+        public static IConfigurationSection Logging => configuration.GetSection("Logging");
+        public static IList<Service> Services => configuration.GetValue<IList<Service>>("SERVICES");
+
+        public static bool UseRedisCache => configuration.GetValue<bool>("USE_REDIS");
+
+        public static void Build(IConfigurationRoot configurationRoot)
+        {
+            configuration = configurationRoot;
+        }
+
+        public static void Build()
+        {
+            configuration = new ConfigurationBuilder().AddEnvironmentVariables().Build();
         }
     }
 }

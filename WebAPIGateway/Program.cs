@@ -12,11 +12,11 @@ namespace WebAPIGateway
 
         public static IWebHost BuildWebHost(string[] args)
         {
-            var config = new Configuration();
+            Configuration.Build();
 
             return WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
-                .UseUrls(config.URL)
+                .UseUrls(Configuration.URL)
                 .Build();
         }
     }

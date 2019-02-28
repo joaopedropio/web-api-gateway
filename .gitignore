@@ -1,7 +1,7 @@
-WebAPIGateway/bin
-WebAPIGateway/obj
-WebAPIGateway/.vs
-WebAPIGateway/.vscode
-WebAPIGateway/out
+bin
+obj
+.vs
+.vscode
+out
 .vscode
 .vs
