@@ -3,8 +3,9 @@ using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using WebAPIGateway;
 using System.Linq;
+using WebAPIGateway.Domain;
 
-namespace Tests
+namespace WebAPIGateway.Tests
 {
     public class ConfigurationTests
     {

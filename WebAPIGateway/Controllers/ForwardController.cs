@@ -7,7 +7,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using static WebAPIGateway.Helpers.HttpResponse;
 using System.IO;
 using System.Text;
-using WebAPIGateway.Helpers;
+using WebAPIGateway.MethodExtensions;
 
 namespace WebAPIGateway.Controllers
 {

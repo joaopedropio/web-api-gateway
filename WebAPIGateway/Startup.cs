@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
+using WebAPIGateway.Domain;
+using WebAPIGateway.MethodExtensions;
 
 namespace WebAPIGateway
 {
@@ -13,7 +15,7 @@ namespace WebAPIGateway
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            ConfigureCache(services);
+            services.AddCache();
             services.AddCors();
         }
 
@@ -23,26 +25,9 @@ namespace WebAPIGateway
             if(env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                loggerFactory.AddConsole(Configuration.Logging);
-                loggerFactory.AddDebug();
             }
 
             app.UseMvc();
-        }
-
-        public void ConfigureCache(IServiceCollection services)
-        {
-            if (Configuration.UseRedisCache)
-            {
-                services.AddDistributedRedisCache(option => {
-                    option.Configuration = Configuration.CacheDomain;
-                    option.InstanceName = "master";
-                });
-            }
-            else
-            {
-                services.AddDistributedMemoryCache();
-            }
         }
 
         private void LoadDefaultServices(IDistributedCache cache, IEnumerable<Service> services)

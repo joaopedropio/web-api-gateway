@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace WebAPIGateway
+namespace WebAPIGateway.Domain
 {
     public class Service
     {

@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
+using WebAPIGateway.Domain;
+using WebAPIGateway.Helpers;
 
 namespace WebAPIGateway
 {
@@ -18,41 +20,10 @@ namespace WebAPIGateway
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAdmin(string service)
+        public async Task<IActionResult> GetAdmin(string serviceName)
         {
-            if(string.IsNullOrEmpty(service))
-            {
-                return new JsonResult(new { error = "No service provided" })
-                {
-                    StatusCode = HttpStatusCode.BadRequest.GetHashCode()
-                };
-            }
-
-            string url;
-            try
-            {
-                url = await cache.GetStringAsync(service);
-            }
-            catch (Exception ex)
-            {
-                return new JsonResult(new { error = ex.Message })
-                {
-                    StatusCode = HttpStatusCode.BadRequest.GetHashCode()
-                };
-            }
-
-            if(string.IsNullOrEmpty(url))
-            {
-                return new JsonResult(new { error = "Service not found" })
-                {
-                    StatusCode = HttpStatusCode.NotFound.GetHashCode()
-                };
-            }
-
-            return new JsonResult(new { service, url })
-            {
-                StatusCode = HttpStatusCode.OK.GetHashCode()
-            };
+            var json = await ServiceValidations.GetService(this.cache, serviceName);
+            return JsonResultHelper.Parse(json);
         }
 
         [HttpPost]
@@ -67,7 +38,7 @@ namespace WebAPIGateway
                 {
                     await cache.SetStringAsync(service, serviceUrl.ToString());
                 }
-                catch (System.Exception ex)
+                catch (Exception ex)
                 {
                     return new JsonResult(new { error = ex.Message })
                     {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using WebAPIGateway.Domain;
 
 namespace WebAPIGateway
 {

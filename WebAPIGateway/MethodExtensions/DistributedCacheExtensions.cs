@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace WebAPIGateway.Helpers
+namespace WebAPIGateway.MethodExtensions
 {
     public static class DistributedCacheExtensions
     {
