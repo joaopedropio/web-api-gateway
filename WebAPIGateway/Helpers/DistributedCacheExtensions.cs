@@ -1,14 +1,18 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace Service
+namespace WebAPIGateway.Helpers
 {
-    public static class Service
+    public static class DistributedCacheExtensions
     {
         public static async Task<string> GetServiceAsync(this IDistributedCache cache, string service, string uri)
         {
             var serviceUrl = await cache.GetStringAsync(service);
-            return serviceUrl == null ? null : $"{serviceUrl}/{uri}";
+
+            if (string.IsNullOrEmpty(serviceUrl))
+                return string.Empty;
+
+            return $"{serviceUrl}/{uri}";
         }
     }
 }

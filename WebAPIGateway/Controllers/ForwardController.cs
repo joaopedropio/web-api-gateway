@@ -4,10 +4,10 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using Service;
 using static WebAPIGateway.Helpers.HttpResponse;
 using System.IO;
 using System.Text;
+using WebAPIGateway.Helpers;
 
 namespace WebAPIGateway.Controllers
 {
@@ -25,7 +25,20 @@ namespace WebAPIGateway.Controllers
 
         public async Task<ContentResult> Index(string service, string uri)
         {
-            var url = await cache.GetServiceAsync(service, uri);
+            string url;
+            try
+            {
+                url = await cache.GetServiceAsync(service, uri);
+            }
+            catch (Exception ex)
+            {
+                return new ContentResult()
+                {
+                    ContentType = "application/json",
+                    StatusCode = HttpStatusCode.InternalServerError.GetHashCode(),
+                    Content = "{ \"error\": \"" + ex.Message + "\" }"
+                };
+            }
 
             switch (Request.Method)
             {

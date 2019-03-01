@@ -1,4 +1,6 @@
+using System;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
@@ -18,32 +20,39 @@ namespace WebAPIGateway
         [HttpGet]
         public async Task<IActionResult> GetAdmin(string service)
         {
-            if(service == null || service == string.Empty)
+            if(string.IsNullOrEmpty(service))
             {
-                return new JsonResult(new { error = "No service provided" });
+                return new JsonResult(new { error = "No service provided" })
+                {
+                    StatusCode = HttpStatusCode.BadRequest.GetHashCode()
+                };
             }
 
-            JsonResult json;
             string url;
             try
             {
                 url = await cache.GetStringAsync(service);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                json = new JsonResult(new { error = ex.Message });
-                json.StatusCode = 400;
-                return json;
+                return new JsonResult(new { error = ex.Message })
+                {
+                    StatusCode = HttpStatusCode.BadRequest.GetHashCode()
+                };
             }
 
-            if (url == null || url == string.Empty)
+            if(string.IsNullOrEmpty(url))
             {
-                json = new JsonResult(new { error = "Service not found" });
-                json.StatusCode = 404;
-                return json;
+                return new JsonResult(new { error = "Service not found" })
+                {
+                    StatusCode = HttpStatusCode.NotFound.GetHashCode()
+                };
             }
 
-            return new JsonResult(new {service, url});
+            return new JsonResult(new { service, url })
+            {
+                StatusCode = HttpStatusCode.OK.GetHashCode()
+            };
         }
 
         [HttpPost]
@@ -60,25 +69,32 @@ namespace WebAPIGateway
                 }
                 catch (System.Exception ex)
                 {
-                    Json(new { error = ex.Message});
+                    return new JsonResult(new { error = ex.Message })
+                    {
+                        StatusCode = HttpStatusCode.InternalServerError.GetHashCode()
+                    };
                 }
 
                 return new JsonResult(new { status = "Service added" });
             }
             catch (System.Exception)
             {
-                var json = new JsonResult(new { error = "Body can't be empty" });
-                json.StatusCode = 400;
-                return json;
+                return new JsonResult(new { error = "Body can't be empty" })
+                {
+                    StatusCode = HttpStatusCode.BadRequest.GetHashCode()
+                };
             }
         }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteAdmin(string service)
         {
-            if(service == null || service == string.Empty)
+            if(string.IsNullOrEmpty(service))
             {
-                return Json(new { error = "Service can not be empty" });
+                return new JsonResult(new { error = "Service can not be empty" })
+                {
+                    StatusCode = HttpStatusCode.BadRequest.GetHashCode()
+                };
             }
 
             string value;
@@ -88,12 +104,18 @@ namespace WebAPIGateway
             }
             catch (System.Exception ex)
             {
-                return Json(new { error = ex.Message});
+                return new JsonResult(new { error = ex.Message })
+                {
+                    StatusCode = HttpStatusCode.InternalServerError.GetHashCode()
+                };
             }
 
-            if(value == null || value == string.Empty)
+            if(string.IsNullOrEmpty(value))
             {
-                return Json(new { error = "Service does not exist" });
+                return new JsonResult(new { error = "Service does not exist" })
+                {
+                    StatusCode = HttpStatusCode.NotFound.GetHashCode()
+                };
             } 
             else
             {
@@ -101,11 +123,18 @@ namespace WebAPIGateway
                 {
                     await cache.RemoveAsync(service);
                 }
-                catch (System.Exception ex)
+                catch (Exception ex)
                 {
-                    return Json(new { error = ex.Message});
+                    return new JsonResult(new { error = ex.Message })
+                    {
+                        StatusCode = HttpStatusCode.InternalServerError.GetHashCode()
+                    };
                 }
-                return Json(new { status = "Service deleted" });
+
+                return new JsonResult(new { status = "Service deleted" })
+                {
+                    StatusCode = HttpStatusCode.NoContent.GetHashCode()
+                };
             }
         }
     }

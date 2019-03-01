@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace WebAPIGateway
@@ -16,20 +17,39 @@ namespace WebAPIGateway
 
         public Service(string service)
         {
-            var arr = service.Split(',');
-            this.Name = arr[0];
-            this.URL = arr[1];
+            try
+            {
+                var arr = service.Split(',');
+
+                if (arr.Length != 2)
+                    throw new Exception();
+
+                this.Name = arr[0];
+                this.URL = arr[1];
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Service provided is invalid", ex);
+            }
         }
 
-        public static IEnumerable<Service> ParseServices(string services)
+        public static IList<Service> ParseServices(string services)
         {
-            return services.Split(';').Select(s => new Service(s));
+            if (string.IsNullOrEmpty(services))
+                return new List<Service>();
+
+            return services.Split(';').Select(s => new Service(s)).ToList();
         }
 
         public override bool Equals(object obj)
         {
             var service = (Service)obj;
             return this.Name == service.Name && this.URL == service.URL;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Name, URL);
         }
     }
 }

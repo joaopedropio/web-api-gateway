@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace WebAPIGateway
 {
@@ -14,13 +17,15 @@ namespace WebAPIGateway
             services.AddCors();
         }
 
-        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, IDistributedCache cache)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IDistributedCache cache)
         {
-            RedisCache.DefaultValues(cache);
-            app.UseDeveloperExceptionPage();
-
-            loggerFactory.AddConsole(Configuration.Logging);
-            loggerFactory.AddDebug();
+            LoadDefaultServices(cache, Configuration.Services);
+            if(env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                loggerFactory.AddConsole(Configuration.Logging);
+                loggerFactory.AddDebug();
+            }
 
             app.UseMvc();
         }
@@ -36,8 +41,11 @@ namespace WebAPIGateway
             }
             else
             {
-                services.AddMemoryCache();
+                services.AddDistributedMemoryCache();
             }
         }
+
+        private void LoadDefaultServices(IDistributedCache cache, IEnumerable<Service> services)
+            => services?.Select(service => cache.SetStringAsync(service.Name, service.URL));
     }
 }

@@ -2,6 +2,7 @@ using NUnit.Framework;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using WebAPIGateway;
+using System.Linq;
 
 namespace Tests
 {
@@ -19,7 +20,7 @@ namespace Tests
             {
                 new KeyValuePair<string, string>("API_DOMAIN", "meusite"),
                 new KeyValuePair<string, string>("API_PORT", "12345"),
-                new KeyValuePair<string, string>("CACHE_DOMAIN", "cache"),
+                new KeyValuePair<string, string>("CACHE_DOMAIN", "cachedomain"),
                 new KeyValuePair<string, string>("SERVICES", "talservico,http://talservico;outroservico,http://outroservico"),
                 new KeyValuePair<string, string>("USE_REDIS", "true"),
             };
@@ -33,7 +34,8 @@ namespace Tests
             Configuration.Build(this.emptyConfiguration);
             Assert.AreEqual(false, Configuration.UseRedisCache);
             Assert.AreEqual("localhost", Configuration.CacheDomain);
-            Assert.AreEqual(null, Configuration.Services);
+            Assert.AreEqual("http://*:80", Configuration.URL);
+            Assert.AreEqual(new List<Service>(), Configuration.Services);
         }
 
         [Test]
@@ -41,11 +43,12 @@ namespace Tests
         {
             Configuration.Build(this.filledConfiguration);
             Assert.AreEqual(true, Configuration.UseRedisCache);
-            Assert.AreEqual("home", Configuration.CacheDomain);
-            Assert.AreEqual(new List<WebAPIGateway.Service>()
+            Assert.AreEqual("cachedomain", Configuration.CacheDomain);
+            Assert.AreEqual("http://meusite:12345", Configuration.URL);
+            Assert.AreEqual(new List<Service>()
             {
-                new WebAPIGateway.Service("talservico", "http://talservico"),
-                new WebAPIGateway.Service("outroservico", "http://outroservico")
+                new Service("talservico", "http://talservico"),
+                new Service("outroservico", "http://outroservico")
 
             }, Configuration.Services);
         }
