@@ -13,30 +13,30 @@ namespace WebAPIGateway
     [Route("/admin/{*service}")]
     public class AdminController: Controller
     {
-        IDistributedCache cache;
-        public AdminController(IDistributedCache cache)
+        IServiceRepository serviceRepo;
+        public AdminController(IServiceRepository serviceRepo)
         {
-            this.cache = cache;
+            this.serviceRepo = serviceRepo;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAdmin(string serviceName)
         {
-            var json = await ServiceValidations.GetService(this.cache, serviceName);
+            var json = await ServiceValidations.GetService(serviceRepo, serviceName);
             return JsonResultHelper.Parse(json);
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostAdmin(string service)
+        public async Task<IActionResult> PostAdmin(string serviceName)
         {
             var content = new StreamReader(Request.Body).ReadToEnd();
-            var serviceUrl = JsonConvert.DeserializeObject<ServiceUrl>(content);
+            var service = JsonConvert.DeserializeObject<Service>(content);
 
             try
             {
                 try
                 {
-                    await cache.SetStringAsync(service, serviceUrl.ToString());
+                    await serviceRepo.StoreAsync(new Service(serviceName, service.URL));
                 }
                 catch (Exception ex)
                 {
@@ -48,7 +48,7 @@ namespace WebAPIGateway
 
                 return new JsonResult(new { status = "Service added" });
             }
-            catch (System.Exception)
+            catch (Exception)
             {
                 return new JsonResult(new { error = "Body can't be empty" })
                 {
@@ -58,9 +58,9 @@ namespace WebAPIGateway
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteAdmin(string service)
+        public async Task<IActionResult> DeleteAdmin(string serviceName)
         {
-            if(string.IsNullOrEmpty(service))
+            if(string.IsNullOrEmpty(serviceName))
             {
                 return new JsonResult(new { error = "Service can not be empty" })
                 {
@@ -68,10 +68,10 @@ namespace WebAPIGateway
                 };
             }
 
-            string value;
+            IService service;
             try
             {
-                value = await cache.GetStringAsync(service);
+                service = await serviceRepo.RetrieveAsync(serviceName);
             }
             catch (System.Exception ex)
             {
@@ -81,7 +81,7 @@ namespace WebAPIGateway
                 };
             }
 
-            if(string.IsNullOrEmpty(value))
+            if(string.IsNullOrEmpty(service.URL))
             {
                 return new JsonResult(new { error = "Service does not exist" })
                 {
@@ -92,7 +92,7 @@ namespace WebAPIGateway
             {
                 try
                 {
-                    await cache.RemoveAsync(service);
+                    await serviceRepo.RemoveAsync(serviceName);
                 }
                 catch (Exception ex)
                 {

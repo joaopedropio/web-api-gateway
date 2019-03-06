@@ -14,18 +14,23 @@ namespace WebAPIGateway.Tests
         [Test]
         public void Should_GetAdmin_When_AdminExists()
         {
+            // Arrange
             var serviceName = "servico";
-            var serviceUrl = "http://servico";
-            var cache = new CacheMock();
+            var service = new Service(serviceName, "http://servico");
+            var services = new List<IService>() { service };
+            var serviceRepo = new ServiceRepositoryMock(services);
             var jsonExpected = new JsonResponse()
             {
-                Data = new { serviceName, serviceUrl },
+                Data = service,
                 StatusCode = HttpStatusCode.OK
             };
 
-            var jsonResult = Task.Run(() => ServiceValidations.GetService(cache, serviceName)).Result;
+            // Act
+            var jsonResult = Task.Run(() => ServiceValidations.GetService(serviceRepo, serviceName)).Result;
 
+            // Assert
             Assert.AreEqual(jsonExpected.StatusCode, jsonResult.StatusCode);
+            Assert.AreEqual(jsonExpected.Data, jsonResult.Data);
         }
     }
 }

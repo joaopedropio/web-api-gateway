@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebAPIGateway.Domain;
 
 namespace WebAPIGateway.MethodExtensions
 {
@@ -12,10 +13,8 @@ namespace WebAPIGateway.MethodExtensions
         {
             if (Configuration.UseRedisCache)
             {
-                services.AddDistributedRedisCache(option => {
-                    option.Configuration = Configuration.CacheDomain;
-                    option.InstanceName = "master";
-                });
+                var redis = new Redis();
+                services.AddSingleton<IServiceRepository>(new ServiceRedisRepository(redis.Instance));
             }
             else
             {

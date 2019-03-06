@@ -16,7 +16,7 @@ namespace WebAPIGateway
                 return string.Format($"http://{domain}:{port}");
             }
         }
-        public static string CacheDomain => configuration.GetValue<string>("CACHE_DOMAIN") ?? "localhost";
+        public static string CacheConnectionString => configuration.GetValue<string>("CACHE_CONFIG") ?? "localhost";
         public static IConfigurationSection Logging => configuration.GetSection("Logging");
         public static IList<Service> Services => Service.ParseServices(configuration.GetValue<string>("SERVICES"));
 

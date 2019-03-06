@@ -1,12 +1,16 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace WebAPIGateway.Domain
 {
-    public class Service
+    public class Service : IService
     {
+        [JsonProperty(PropertyName = "name")]
         public string Name { get; set; }
+
+        [JsonProperty(PropertyName = "url")]
         public string URL { get; set; }
 
         public Service(string name, string url)

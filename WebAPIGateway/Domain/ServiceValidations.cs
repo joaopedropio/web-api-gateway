@@ -10,29 +10,29 @@ namespace WebAPIGateway.Domain
 {
     public static class ServiceValidations
     {
-        public static async Task<JsonResponse> GetService(IDistributedCache cache, string serviceName)
+        public static async Task<JsonResponse> GetService(IServiceRepository serviceRepo, string serviceName)
         {
             if (string.IsNullOrEmpty(serviceName))
             {
                 return new JsonResponse(new { error = "No service provided" }, HttpStatusCode.BadRequest);
             }
 
-            string url;
+            IService service;
             try
             {
-                url = await cache.GetStringAsync(serviceName);
+                service = await serviceRepo.RetrieveAsync(serviceName);
             }
             catch (Exception ex)
             {
                 return new JsonResponse(new { error = ex.Message }, HttpStatusCode.BadRequest);
             }
 
-            if (string.IsNullOrEmpty(url))
+            if (string.IsNullOrEmpty(service.URL))
             {
                 return new JsonResponse(new { error = "Service not found" },  HttpStatusCode.NotFound);
             }
 
-            return new JsonResponse(new { serviceName, url }, HttpStatusCode.OK);
+            return new JsonResponse(service, HttpStatusCode.OK);
         }
     }
 }
