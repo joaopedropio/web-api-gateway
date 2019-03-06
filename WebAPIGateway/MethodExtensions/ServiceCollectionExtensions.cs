@@ -18,7 +18,7 @@ namespace WebAPIGateway.MethodExtensions
             }
             else
             {
-                services.AddDistributedMemoryCache();
+                services.AddSingleton<IServiceRepository>(new ServiceInMemoryRepository());
             }
         }
     }

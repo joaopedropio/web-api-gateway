@@ -18,7 +18,7 @@ namespace WebAPIGateway.Tests
             var serviceName = "servico";
             var service = new Service(serviceName, "http://servico");
             var services = new List<IService>() { service };
-            var serviceRepo = new ServiceRepositoryMock(services);
+            var serviceRepo = new ServiceInMemoryRepository(services);
             var jsonExpected = new JsonResponse()
             {
                 Data = service,

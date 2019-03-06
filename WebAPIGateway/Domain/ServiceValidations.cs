@@ -34,5 +34,26 @@ namespace WebAPIGateway.Domain
 
             return new JsonResponse(service, HttpStatusCode.OK);
         }
+
+        public static async Task<JsonResponse> PostService(IServiceRepository serviceRepo, IService service)
+        {
+            try
+            {
+                try
+                {
+                    await serviceRepo.StoreAsync(new Service(service.Name, service.URL));
+                }
+                catch (Exception ex)
+                {
+                    return new JsonResponse(new { error = ex.Message }, HttpStatusCode.InternalServerError);
+                }
+
+                return new JsonResponse(new { status = "Service added" }, HttpStatusCode.Created);
+            }
+            catch (Exception)
+            {
+                return new JsonResponse(new { error = "Body can't be empty" }, HttpStatusCode.BadRequest);
+            }
+        }
     }
 }

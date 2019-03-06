@@ -10,7 +10,9 @@ using WebAPIGateway.Helpers;
 
 namespace WebAPIGateway
 {
-    [Route("/admin/{*service}")]
+    [Produces("application/json")]
+    [Route("/admin/{*serviceName}")]
+    [ApiController]
     public class AdminController: Controller
     {
         IServiceRepository serviceRepo;
@@ -27,34 +29,11 @@ namespace WebAPIGateway
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostAdmin(string serviceName)
+        public async Task<IActionResult> PostAdmin()
         {
-            var content = new StreamReader(Request.Body).ReadToEnd();
-            var service = JsonConvert.DeserializeObject<Service>(content);
-
-            try
-            {
-                try
-                {
-                    await serviceRepo.StoreAsync(new Service(serviceName, service.URL));
-                }
-                catch (Exception ex)
-                {
-                    return new JsonResult(new { error = ex.Message })
-                    {
-                        StatusCode = HttpStatusCode.InternalServerError.GetHashCode()
-                    };
-                }
-
-                return new JsonResult(new { status = "Service added" });
-            }
-            catch (Exception)
-            {
-                return new JsonResult(new { error = "Body can't be empty" })
-                {
-                    StatusCode = HttpStatusCode.BadRequest.GetHashCode()
-                };
-            }
+            var service = Service.ParseService(Request.Body);
+            var json = await ServiceValidations.PostService(serviceRepo, service);
+            return JsonResultHelper.Parse(json);
         }
 
         [HttpDelete]

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace WebAPIGateway.Domain
@@ -13,6 +14,7 @@ namespace WebAPIGateway.Domain
         [JsonProperty(PropertyName = "url")]
         public string URL { get; set; }
 
+        [JsonConstructor]
         public Service(string name, string url)
         {
             Name = name;
@@ -35,6 +37,12 @@ namespace WebAPIGateway.Domain
             {
                 throw new Exception("Service provided is invalid", ex);
             }
+        }
+
+        public static IService ParseService(Stream body)
+        {
+            var content = new StreamReader(body).ReadToEnd();
+            return JsonConvert.DeserializeObject<Service>(content);
         }
 
         public static IList<Service> ParseServices(string services)

@@ -20,7 +20,9 @@
       "launchBrowser": true,
       "environmentVariables": {
         "API_PORT": "5000",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "USE_REDIS": "true",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "CACHE_CONFIG": "localhost:6379"
       },
       "applicationUrl": "http://localhost:50950/"
     }
