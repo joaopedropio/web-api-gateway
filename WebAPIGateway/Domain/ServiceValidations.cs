@@ -27,7 +27,7 @@ namespace WebAPIGateway.Domain
                 return new JsonResponse(new { error = ex.Message }, HttpStatusCode.BadRequest);
             }
 
-            if (string.IsNullOrEmpty(service.URL))
+            if (string.IsNullOrEmpty(service?.URL))
             {
                 return new JsonResponse(new { error = "Service not found" },  HttpStatusCode.NotFound);
             }

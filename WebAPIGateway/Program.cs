@@ -7,17 +7,15 @@ namespace WebAPIGateway
     {
         public static void Main(string[] args)
         {
-            BuildWebHost(args).Run();
+            Configuration.Build();
+            BuildWebHost().Build().Run();
         }
 
-        public static IWebHost BuildWebHost(string[] args)
+        public static IWebHostBuilder BuildWebHost()
         {
-            Configuration.Build();
-
-            return WebHost.CreateDefaultBuilder(args)
+            return WebHost.CreateDefaultBuilder()
                 .UseStartup<Startup>()
-                .UseUrls(Configuration.URL)
-                .Build();
+                .UseUrls(Configuration.URL);
         }
     }
 }
