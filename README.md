@@ -1,4 +1,4 @@
-# Web API Gateway
+# Web API Gateway [![CircleCI](https://circleci.com/gh/joaopedropio/web-api-gateway/tree/master.svg?style=svg)](https://circleci.com/gh/joaopedropio/web-api-gateway/tree/master)
 
 The Web API Gateway is a Dotnet Core API is the gateway to the microservices of the Social Movie project. 
 This gateway is only for web apps use. Soon, we'll have the Mobile API Gateway service to mobile clients.
