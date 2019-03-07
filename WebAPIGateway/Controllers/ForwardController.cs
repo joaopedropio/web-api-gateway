@@ -1,43 +1,40 @@
-using System.Net;
+using static System.Net.HttpStatusCode;
 using System.Net.Http;
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Distributed;
 using static WebAPIGateway.Helpers.HttpResponse;
 using System.IO;
 using System.Text;
-using WebAPIGateway.MethodExtensions;
+using WebAPIGateway.Domain;
+using WebAPIGateway.JSON;
 
 namespace WebAPIGateway.Controllers
 {
 
-    [Route("/{service}/{*uri}")]
-    public class ForwardController : Controller 
+    [Route("/{serviceName}/{*uri}")]
+    public class ForwardController : Controller
     {
-        private IDistributedCache cache;
+        private IServiceRepository services;
         private HttpClient client;
-        public ForwardController(IDistributedCache cache)
+        public ForwardController(IServiceRepository services)
         {
-            this.cache = cache;
+            this.services = services;
             this.client = new HttpClient();
         }
 
-        public async Task<ContentResult> Index(string service, string uri)
+        public async Task<IActionResult> Index(string serviceName, string uri)
         {
+            IService service;
             string url;
             try
             {
-                url = await cache.GetServiceAsync(service, uri);
+                service = await services.RetrieveAsync(serviceName);
+                url = $"{service.URL}/{uri}";
             }
             catch (Exception ex)
             {
-                return new ContentResult()
-                {
-                    ContentType = "application/json",
-                    StatusCode = HttpStatusCode.InternalServerError.GetHashCode(),
-                    Content = "{ \"error\": \"" + ex.Message + "\" }"
-                };
+                return JsonResultHelper.CreateUnknownErrorJsonResult(ex.Message, ex.StackTrace, InternalServerError);
             }
 
             switch (Request.Method)
@@ -51,7 +48,7 @@ namespace WebAPIGateway.Controllers
                 case "DELETE":
                     return await ForwardHttp(client.DeleteAsync, url);
                 default:
-                    return Response("{ \"error\": \"Method not supported\" }", HttpStatusCode.BadRequest);
+                    return JsonResultHelper.CreateErrorJsonResult(Messages.MethodNotSupported, MethodNotAllowed);
             }
         }
 
@@ -66,7 +63,7 @@ namespace WebAPIGateway.Controllers
             }
             catch (Exception ex)
             {
-                return Response(ex.Message, HttpStatusCode.ServiceUnavailable);
+                return Response(ex.Message, ServiceUnavailable);
             }
         }
 
@@ -79,7 +76,7 @@ namespace WebAPIGateway.Controllers
             }
             catch (Exception ex)
             {
-                return Response(ex.Message, HttpStatusCode.ServiceUnavailable);
+                return Response(ex.Message, ServiceUnavailable);
             }
         }
     }

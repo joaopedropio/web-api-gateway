@@ -1,20 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 
-namespace WebAPIGateway.Helpers
+namespace WebAPIGateway.JSON
 {
-    public class JsonResponse
+    public class JsonResponse : IJsonResponse
     {
-        public object Data;
-        public HttpStatusCode StatusCode;
+        public IJsonData Data { get; set; }
+        public HttpStatusCode StatusCode { get; set; }
 
-        public JsonResponse()
-        { }
+        public JsonResponse() { }
 
-        public JsonResponse(object data, HttpStatusCode statusCode)
+        public JsonResponse(IJsonData data, HttpStatusCode statusCode)
         {
             this.Data = data;
             this.StatusCode = statusCode;

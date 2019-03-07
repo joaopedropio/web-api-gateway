@@ -18,7 +18,7 @@ namespace WebAPIGateway
         }
         public static string CacheConnectionString => configuration.GetValue<string>("CACHE_CONFIG") ?? "localhost";
         public static IConfigurationSection Logging => configuration.GetSection("Logging");
-        public static IList<Service> Services => Service.ParseServices(configuration.GetValue<string>("SERVICES"));
+        public static IList<IService> Services => Service.ParseServices(configuration.GetValue<string>("SERVICES"));
 
         public static bool UseRedisCache => configuration.GetValue<bool>("USE_REDIS");
 

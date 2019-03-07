@@ -1,24 +1,21 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using WebAPIGateway.Domain;
 
 namespace WebAPIGateway.MethodExtensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddCache(this IServiceCollection services)
+        public static void AddCache(this IServiceCollection services, IList<IService> defaultServices)
         {
             if (Configuration.UseRedisCache)
             {
                 var redis = new Redis();
-                services.AddSingleton<IServiceRepository>(new ServiceRedisRepository(redis.Instance));
+                services.AddSingleton<IServiceRepository>(new ServiceRedisRepository(redis.Instance, defaultServices));
             }
             else
             {
-                services.AddSingleton<IServiceRepository>(new ServiceInMemoryRepository());
+                services.AddSingleton<IServiceRepository>(new ServiceInMemoryRepository(defaultServices));
             }
         }
     }

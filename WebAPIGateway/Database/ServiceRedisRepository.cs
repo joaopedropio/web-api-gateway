@@ -1,4 +1,6 @@
 ﻿using StackExchange.Redis;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace WebAPIGateway.Domain
@@ -6,10 +8,18 @@ namespace WebAPIGateway.Domain
     public class ServiceRedisRepository : IServiceRepository
     {
         private IDatabase redis;
+
         public ServiceRedisRepository(IDatabase cache)
         {
             this.redis = cache;
         }
+
+        public ServiceRedisRepository(IDatabase cache, IList<IService> defaultServices)
+            : this(cache)
+        {
+            defaultServices.Select(ds => this.StoreAsync(ds));
+        }
+
         public async Task RemoveAsync(string serviceName)
         {
             var service = await this.RetrieveAsync(serviceName);

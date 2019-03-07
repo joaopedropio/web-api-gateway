@@ -36,7 +36,7 @@ namespace WebAPIGateway.Tests
             Assert.AreEqual(false, Configuration.UseRedisCache);
             Assert.AreEqual("localhost", Configuration.CacheConnectionString);
             Assert.AreEqual("http://*:80", Configuration.URL);
-            Assert.AreEqual(new List<Service>(), Configuration.Services);
+            Assert.AreEqual(new List<IService>(), Configuration.Services);
         }
 
         [Test]
@@ -46,7 +46,7 @@ namespace WebAPIGateway.Tests
             Assert.AreEqual(true, Configuration.UseRedisCache);
             Assert.AreEqual("cachedomain", Configuration.CacheConnectionString);
             Assert.AreEqual("http://meusite:12345", Configuration.URL);
-            Assert.AreEqual(new List<Service>()
+            Assert.AreEqual(new List<IService>()
             {
                 new Service("talservico", "http://talservico"),
                 new Service("outroservico", "http://outroservico")

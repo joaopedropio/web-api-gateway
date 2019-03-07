@@ -1,30 +1,14 @@
 {
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:50949/",
-      "sslPort": 0
-    }
-  },
   "profiles": {
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
     "WebAPIGateway": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "environmentVariables": {
         "API_PORT": "5000",
-        "USE_REDIS": "true",
+        "USE_REDIS": "false",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "CACHE_CONFIG": "localhost:6379"
-      },
-      "applicationUrl": "http://localhost:50950/"
+      }
     }
   }
 }
